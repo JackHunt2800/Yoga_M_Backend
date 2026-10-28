@@ -16,6 +16,12 @@ export interface UserProfile {
   photoURL?: string;
   role: 'teacher' | 'student' | 'admin';
   streakDays?: number;
+  height?: number;
+  heightUnit?: string;
+  weight?: number;
+  weightUnit?: string;
+  ageRange?: string;
+  gender?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -211,10 +217,16 @@ export class AuthService {
     fallbackUserId?: string,
   ): Promise<UserProfile> {
     const current = await this.getMe(tokenOrAuthHeader, fallbackUserId);
-    return this.updateUserRecord(current.uid, {
-      displayName: dto.displayName,
-      photoURL: dto.photoURL,
-    });
+    const updates: Partial<UserProfile> = {};
+    if (dto.displayName !== undefined) updates.displayName = dto.displayName;
+    if (dto.photoURL !== undefined) updates.photoURL = dto.photoURL;
+    if (dto.height !== undefined) updates.height = dto.height;
+    if (dto.heightUnit !== undefined) updates.heightUnit = dto.heightUnit;
+    if (dto.weight !== undefined) updates.weight = dto.weight;
+    if (dto.weightUnit !== undefined) updates.weightUnit = dto.weightUnit;
+    if (dto.ageRange !== undefined) updates.ageRange = dto.ageRange;
+    if (dto.gender !== undefined) updates.gender = dto.gender;
+    return this.updateUserRecord(current.uid, updates);
   }
 
 

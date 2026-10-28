@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches, IsIn } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsNumber, Matches, IsIn } from 'class-validator';
 
 export class CreateTeacherDto {
   @IsEmail({}, { message: 'Must be a valid email address' })
@@ -31,5 +31,29 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   photoURL?: string;
+
+  @IsOptional()
+  @IsNumber()
+  height?: number;
+
+  @IsOptional()
+  @IsString()
+  heightUnit?: string; // 'cm' | 'ft'
+
+  @IsOptional()
+  @IsNumber()
+  weight?: number;
+
+  @IsOptional()
+  @IsString()
+  weightUnit?: string; // 'kg' | 'lbs'
+
+  @IsOptional()
+  @IsString()
+  ageRange?: string; // '18-24' | '25-34' | '35-44' | '45-54' | '55-64' | '65+'
+
+  @IsOptional()
+  @IsString()
+  gender?: string; // 'female' | 'male' | 'non-binary' | 'prefer-not-to-say'
 }
 
