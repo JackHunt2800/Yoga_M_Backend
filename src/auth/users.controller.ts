@@ -21,7 +21,7 @@ export class UsersController {
   constructor(private readonly authService: AuthService) { }
 
   /**
-   * Current user profile endpoint
+   * Get current authenticated user profile
    * Endpoint: GET /api/users/me
    */
   @Get('me')
@@ -36,7 +36,7 @@ export class UsersController {
   }
 
   /**
-   * Update current user profile
+   * Full update current user profile
    * Endpoint: PUT /api/users/me
    */
   @Put('me')
@@ -68,10 +68,11 @@ export class UsersController {
   }
 
   /**
-   * Create teacher account (Admin/Teacher only)
+   * Create a new Teacher account (Teacher/Admin only).
+   * Email must be a Gmail address (@gmail.com).
    * Endpoint: POST /api/users/teacher
    */
-  @Post('create-teacher')
+  @Post('teacher')
   @UseGuards(FirebaseAuthGuard, RolesGuard)
   @Roles('teacher')
   @HttpCode(HttpStatus.CREATED)
@@ -80,7 +81,7 @@ export class UsersController {
   }
 
   /**
-   * Create student account
+   * Create a new Student account.
    * Endpoint: POST /api/users/student
    */
   @Post('student')
@@ -90,8 +91,8 @@ export class UsersController {
   }
 
   /**
-   * List users (Admin/Teacher only)
-   * Endpoint: GET /api/users
+   * List users, optionally filtered by role (Teacher/Admin only)
+   * Endpoint: GET /api/users?role=teacher|student
    */
   @Get()
   @UseGuards(FirebaseAuthGuard, RolesGuard)

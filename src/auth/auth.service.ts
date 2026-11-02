@@ -163,7 +163,7 @@ export class AuthService {
   }
 
   /**
-   * Get current authenticated user profile (/api/auth/me)
+   * Get current authenticated user profile (/api/users/me)
    */
   async getMe(tokenOrAuthHeader?: string, fallbackUserId?: string): Promise<UserProfile> {
     const userSession = await this.resolveSession(tokenOrAuthHeader, fallbackUserId);
@@ -208,7 +208,7 @@ export class AuthService {
   }
 
   /**
-   * Update current authenticated user profile (/api/auth/me)
+   * Update current authenticated user profile (/api/users/me)
    * Note: Role CANNOT be modified through this endpoint. Teachers are added exclusively via API call.
    */
   async updateMe(
@@ -229,9 +229,8 @@ export class AuthService {
     return this.updateUserRecord(current.uid, updates);
   }
 
-
   /**
-   * Verify token for legacy /api/auth/verify endpoint
+   * Verify token for /api/auth/verify endpoint
    */
   async verifyFirebaseToken(idToken: string, requestedRole?: string): Promise<UserSession> {
     if (!idToken || idToken.trim() === '') {
@@ -403,7 +402,6 @@ export class AuthService {
 
     if (!rawToken && fallbackUserId) {
       const user = await this.findUserById(fallbackUserId);
-      console.log("fallback user", user);
       if (user) {
         return {
           uid: user.uid,
@@ -477,7 +475,6 @@ export class AuthService {
       }
     }
 
-
     // 3. Direct UUID or userId passed in token field (useful for testing or direct API invocation)
     if (rawToken.length >= 8 && !rawToken.includes('.')) {
       const cached = await this.findUserById(rawToken);
@@ -504,4 +501,3 @@ export class AuthService {
     throw new UnauthorizedException('Invalid or expired authentication token');
   }
 }
-
