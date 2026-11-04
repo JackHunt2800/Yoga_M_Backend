@@ -31,6 +31,19 @@ export interface PracticeItem {
   curatedBy?: string;
 }
 
+export interface Playlist {
+  /** Date the playlist represents, e.g. "2026-11-04" */
+  date: string;
+  /** Human-friendly label derived from the date */
+  label: string;
+  /** Total estimated duration of all items in this playlist */
+  totalDurationMinutes: number;
+  /** Breakdown by pillar type */
+  counts: { asana: number; mudra: number; mantra: number };
+  /** Items sorted by pillar type then title */
+  items: PracticeItem[];
+}
+
 export interface StudioMetrics {
   activeAsanas: number;
   totalMudras: number;

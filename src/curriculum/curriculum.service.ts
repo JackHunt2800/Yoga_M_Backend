@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FirebaseService } from '../firebase/firebase.service';
-import { PracticeItem, StudioMetrics, PillarType } from './curriculum.interface';
+import { PracticeItem, StudioMetrics, PillarType, Playlist } from './curriculum.interface';
 
 @Injectable()
 export class CurriculumService {
@@ -215,5 +215,81 @@ export class CurriculumService {
       }
     }
     return false;
+  }
+
+  /**
+   * Groups all published curriculum items into playlists by their creation date.
+   * Each playlist contains the asanas, mudras, and mantras created on that date,
+   * sorted newest-first. Optionally filter by pillar type.
+   */
+  async getPlaylists(pillarType?: PillarType | 'all'): Promise<Playlist[]> {
+    const allItems = await this.findAll();
+
+    // Only include published items; optionally filter by pillar
+    const items = allItems.filter((item) => {
+      if (!item.isPublishedToHomeHub) return false;
+      if (pillarType && pillarType !== 'all' && item.pillarType !== pillarType) return false;
+      return true;
+    });
+
+    // Group items by their creation date (YYYY-MM-DD)
+    const grouped = new Map<string, PracticeItem[]>();
+
+    for (const item of items) {
+      const date = item.createdAt ? item.createdAt.slice(0, 10) : 'unknown';
+      if (!grouped.has(date)) {
+        grouped.set(date, []);
+      }
+      grouped.get(date)!.push(item);
+    }
+
+    // Pillar sort order: asana → mudra → mantra
+    const pillarOrder: Record<string, number> = { asana: 0, mudra: 1, mantra: 2 };
+
+    const playlists: Playlist[] = [];
+
+    for (const [date, dateItems] of grouped) {
+      // Sort items within each playlist: by pillar type, then alphabetically by title
+      dateItems.sort((a, b) => {
+        const pillarDiff = (pillarOrder[a.pillarType] ?? 9) - (pillarOrder[b.pillarType] ?? 9);
+        if (pillarDiff !== 0) return pillarDiff;
+        return a.title.localeCompare(b.title);
+      });
+
+      const counts = { asana: 0, mudra: 0, mantra: 0 };
+      let totalDuration = 0;
+
+      for (const item of dateItems) {
+        counts[item.pillarType] = (counts[item.pillarType] || 0) + 1;
+        totalDuration += item.durationMinutes || 0;
+      }
+
+      playlists.push({
+        date,
+        label: this.formatPlaylistLabel(date),
+        totalDurationMinutes: totalDuration,
+        counts,
+        items: dateItems,
+      });
+    }
+
+    // Sort playlists newest-first
+    playlists.sort((a, b) => b.date.localeCompare(a.date));
+
+    return playlists;
+  }
+
+  /** Converts "2026-11-04" to a human-friendly label like "November 4, 2026". */
+  private formatPlaylistLabel(dateStr: string): string {
+    try {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    } catch {
+      return dateStr;
+    }
   }
 }

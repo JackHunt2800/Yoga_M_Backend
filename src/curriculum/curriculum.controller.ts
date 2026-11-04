@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CurriculumService } from './curriculum.service';
-import { PracticeItem, StudioMetrics, PillarType } from './curriculum.interface';
+import { PracticeItem, StudioMetrics, PillarType, Playlist } from './curriculum.interface';
 import { FirebaseAuthGuard, RolesGuard } from '../auth/guards';
 import { Roles, CurrentUser } from '../auth/decorators';
 import { UserProfile } from '../auth/auth.service';
@@ -38,6 +38,13 @@ export class CurriculumController {
       search,
       sort,
     });
+  }
+
+  @Get('playlists')
+  async getPlaylists(
+    @Query('pillar') pillar?: PillarType | 'all',
+  ): Promise<Playlist[]> {
+    return this.curriculumService.getPlaylists(pillar);
   }
 
   @Get(':id')
